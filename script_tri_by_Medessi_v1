@@ -1,0 +1,42 @@
+import os
+import shutil
+
+# Catégories et extensions associées
+categories = {
+    "Images": [".jpg", ".jpeg", ".png", ".gif"],
+    "Vidéos": [".mp4", ".mov", ".avi"],
+    "Documents": [".pdf", ".docx", ".txt", ".xlsx"],
+    "Musique": [".mp3", ".wav"],
+    "Archives": [".zip", ".rar", ".tar"],
+}
+
+# Fonction pour organiser les fichiers
+def organiser_fichiers(dossier):
+    for fichier in os.listdir(dossier):
+        chemin_complet = os.path.join(dossier, fichier)
+
+        # Ignorer les sous-dossiers
+        if os.path.isfile(chemin_complet):
+            _, extension = os.path.splitext(fichier)
+            # Trouver la catégorie correspondante
+            for categorie, extensions in categories.items():
+                if extension.lower() in extensions:
+                    dossier_cible = os.path.join(dossier, categorie)
+                    # Créer le dossier si nécessaire
+                    if not os.path.exists(dossier_cible):
+                        os.makedirs(dossier_cible)
+                    # Déplacer le fichier
+                    shutil.move(chemin_complet, os.path.join(dossier_cible, fichier))
+                    print(f"Déplacé : {fichier} → {dossier_cible}")
+                    break
+
+if __name__ == "__main__":
+    # Demander à l'utilisateur de saisir le chemin du dossier à trier
+    dossier_principal = input("Veuillez saisir le chemin du dossier à organiser : ")
+
+    # Vérifier si le dossier existe
+    if os.path.exists(dossier_principal) and os.path.isdir(dossier_principal):
+        organiser_fichiers(dossier_principal)
+        print("Organisation terminée !")
+    else:
+        print("Erreur : Le chemin saisi n'existe pas ou ce n'est pas un dossier.")
