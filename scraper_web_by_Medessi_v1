@@ -1,0 +1,53 @@
+import requests
+from bs4 import BeautifulSoup
+import customtkinter as ctk
+from tkinter import messagebox
+
+# Fonction pour scraper n'importe quelle page web
+def scraper_donnees(url):
+    try:
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        donnees = []
+        for element in soup.find_all(['h1', 'h2', 'h3', 'p', 'a']):
+            texte = element.text.strip()
+            lien = element.get("href", "")
+            if texte:
+                donnees.append(f"{texte} {'(' + lien + ')' if lien else ''}")
+        
+        return donnees[:20]  # Limite à 20 résultats pour éviter l'affichage surchargé
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Une erreur est survenue : {e}")
+        return []
+
+# Fonction principale
+def lancer_scraper():
+    url = entry_url.get()
+    data = scraper_donnees(url)
+    
+    if data:
+        listbox.delete("0.0", "end")
+        for item in data:
+            listbox.insert("end", f"{item}\n")
+
+# Interface graphique
+ctk.set_appearance_mode("dark")
+app = ctk.CTk()
+app.title("Scraper Universel")
+app.geometry("600x400")
+
+label_url = ctk.CTkLabel(app, text="URL du site à scraper :")
+label_url.pack()
+entry_url = ctk.CTkEntry(app, width=500)
+entry_url.pack()
+
+btn_scraper = ctk.CTkButton(app, text="Lancer", command=lancer_scraper)
+btn_scraper.pack(pady=10)
+
+listbox = ctk.CTkTextbox(app, height=300, width=550)
+listbox.pack()
+
+app.mainloop()
